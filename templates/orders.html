@@ -1,0 +1,199 @@
+<!--orders.html-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单明细 - 咖啡点单系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f4ed;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5d4037, #3e2723);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .back-link {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .stats-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7f5f0;
+            border-radius: 8px;
+            border: 1px solid #e8e4dd;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #5d4037;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f7f5f0;
+            font-weight: 600;
+            color: #5d4037;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 40px 0;
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            .stats-summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stat-item {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题部分 -->
+        <div class="header">
+            <a href="/" class="back-link">← 返回</a>
+            <h1>订单明细</h1>
+        </div>
+
+        <div class="content">
+            <!-- 统计卡片 -->
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <div class="stat-value">{{ total_cups }}</div>
+                    <div class="stat-label">总杯数</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-value">{{ order_count }}</div>
+                    <div class="stat-label">总订单</div>
+                </div>
+
+                <div class="stat-item">
+                    {% if order_count > 0 %}
+                    <div class="stat-value">{{ (total_cups / order_count)|round(1) }}</div>
+                    {% else %}
+                    <div class="stat-value">0.0</div>
+                    {% endif %}
+                    <div class="stat-label">场均杯数</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-value">{{ current_time|truncate(5, True, '') }}</div>
+                    <div class="stat-label">更新时间</div>
+                </div>
+            </div>
+
+            <!-- 订单表格 -->
+            <div class="table-container">
+                {% if orders %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>杯数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.time }}</td>
+                            <td>{{ order.cups }}杯</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-orders">
+                    <p>暂无订单记录</p>
+                    <p><a href="/" style="color: #5d4037; margin-top: 15px; display: inline-block;">去下单</a></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="footer">
+            咖啡点单系统 • {{ current_time }}
+        </div>
+    </div>
+</body>
+</html>

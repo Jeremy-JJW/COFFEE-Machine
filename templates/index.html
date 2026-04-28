@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>咖啡点单系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #2c1810;
+            --espresso: #3d2914;
+            --mocha: #5c3d2e;
+            --cream: #faf6f0;
+            --latte: #f0e8dc;
+            --accent: #c17f59;
+            --accent-soft: rgba(193, 127, 89, 0.15);
+            --success: #2d6a4f;
+            --success-bg: #e8f5ef;
+            --err: #9b2335;
+            --err-bg: #fdeef0;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --shadow: 0 4px 24px rgba(44, 24, 16, 0.08);
+            --shadow-lg: 0 20px 50px rgba(44, 24, 16, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans SC", system-ui, sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 24px 16px 40px;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% -20%, rgba(193, 127, 89, 0.12), transparent 50%),
+                radial-gradient(ellipse 80% 50% at 100% 100%, rgba(92, 61, 46, 0.08), transparent 45%),
+                linear-gradient(165deg, #f5f0e8 0%, #e8dfd0 100%);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .header {
+            position: relative;
+            padding: 28px 22px 32px;
+            text-align: center;
+            color: #fff;
+            background:
+                linear-gradient(145deg, #4a2c1a 0%, var(--espresso) 45%, #2a1810 100%);
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4V2H2v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .company-logo {
+            position: relative;
+            z-index: 1;
+            width: auto;
+            max-width: 200px;
+            margin: 0 auto 16px;
+            display: block;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-content h1 {
+            font-family: 'Outfit', 'Noto Sans SC', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 1.3;
+        }
+
+        .header-content p {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            opacity: 0.88;
+            font-weight: 400;
+        }
+
+        /* 通栏主图：与 .container 左右对齐，不留白边 */
+        .coffee-image {
+            padding: 0;
+            margin: -24px 0 8px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+        .coffee-image img {
+            width: 100%;
+            display: block;
+            height: 200px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+        }
+
+        .order-message {
+            margin: 16px 20px;
+            padding: 14px 16px;
+            text-align: center;
+            border-radius: var(--radius-md);
+            background: var(--err-bg);
+            color: var(--err);
+            border: 1px solid rgba(155, 35, 53, 0.2);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .success-message {
+            margin: 16px 20px;
+            padding: 14px 16px;
+            text-align: center;
+            border-radius: var(--radius-md);
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid rgba(45, 106, 79, 0.2);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .url-info {
+            background: var(--cream);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            margin: 15px;
+            text-align: center;
+            font-size: 16px;
+            border: 1px solid var(--latte);
+            line-height: 1.6;
+        }
+
+        .url-info strong {
+            color: var(--mocha);
+            word-break: break-all;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 12px;
+            margin: 8px auto 20px;
+            max-width: 320px;
+            padding: 0 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(180deg, #fffef9 0%, var(--cream) 100%);
+            border: 1px solid var(--latte);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 4px 0;
+            color: var(--mocha);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b5344;
+            font-weight: 500;
+        }
+
+        .making-orders-section {
+            margin: 0 20px 20px;
+            padding: 18px;
+            background: var(--cream);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--latte);
+        }
+
+        .making-orders-section h3 {
+            font-family: 'Outfit', 'Noto Sans SC', sans-serif;
+            color: var(--mocha);
+            margin-bottom: 14px;
+            text-align: center;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .order-progress-item {
+            margin-bottom: 12px;
+            padding: 12px 14px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid var(--latte);
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(44, 24, 16, 0.04);
+        }
+
+        .order-progress-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .order-progress-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 8px;
+        }
+
+        .order-progress-id {
+            font-weight: 700;
+            color: var(--ink);
+            font-size: 0.9rem;
+        }
+
+        .order-progress-count {
+            color: #6b5344;
+            font-size: 0.85rem;
+        }
+
+        .order-progress-pct {
+            text-align: center;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            color: #7a6558;
+        }
+
+        .progress-bar-container {
+            background: #e8e0d6;
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #b8865c, var(--mocha));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 999px;
+        }
+
+        .form-container {
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 0 20px 24px;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--mocha);
+            font-family: 'Outfit', 'Noto Sans SC', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 0 15px;
+        }
+
+        .cup-options {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .cup-option {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .cup-image {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #fffef9, var(--latte));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: var(--mocha);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid var(--latte);
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+            box-shadow: 0 4px 12px rgba(44, 24, 16, 0.06);
+        }
+
+        .cup-image:hover:not(.disabled) {
+            background: linear-gradient(145deg, var(--mocha), var(--espresso));
+            color: #fff;
+            border-color: transparent;
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 10px 24px rgba(61, 41, 20, 0.25);
+        }
+
+        .cup-image.disabled {
+            background: #e8e4df !important;
+            color: #9a8f88 !important;
+            border-color: #d4ccc4 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .cup-label {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--mocha);
+        }
+
+        .cup-hint {
+            color: #7a6558;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 18px;
+            line-height: 1.65;
+            padding: 12px 14px;
+            background: var(--accent-soft);
+            border-radius: var(--radius-md);
+            border: 1px dashed rgba(193, 127, 89, 0.35);
+        }
+
+        #custom-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--mocha);
+            font-size: 0.9rem;
+        }
+
+        input[type="number"] {
+            padding: 14px 16px;
+            border: 2px solid var(--latte);
+            border-radius: var(--radius-md);
+            font-size: 1.125rem;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fffef9;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .submit-btn {
+            padding: 15px 18px;
+            background: linear-gradient(180deg, #6b4a3a 0%, var(--mocha) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+            box-shadow: 0 4px 14px rgba(92, 61, 46, 0.35);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(92, 61, 46, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: linear-gradient(180deg, #b0b0b0, #9e9e9e) !important;
+            color: #eee !important;
+            cursor: not-allowed !important;
+            opacity: 0.85;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .custom-orders-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px;
+            background: var(--cream);
+            color: var(--mocha);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1px solid var(--latte);
+            transition: background 0.3s;
+        }
+
+        .custom-orders-link:hover {
+            background: var(--latte);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 18px 20px 22px;
+            color: #8a7a6e;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--latte);
+            background: linear-gradient(180deg, #fffef9, var(--cream));
+        }
+
+        .loading-text {
+            color: #6b5344;
+            font-size: 0.875rem;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .cup-option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .section {
+            padding: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题部分 -->
+        <div class="header">
+            <img class="company-logo" src="{{ url_for('static', filename='images/ling.png') }}" alt="公司Logo">
+            <div class="header-content">
+                <h1>欢迎光临领志科技</h1>
+                <p>便捷下单，快速制作</p>
+            </div>
+        </div>
+
+        <div class="coffee-image">
+            <img src="{{ url_for('static', filename='images/coffee.png') }}" alt="咖啡" loading="lazy">
+        </div>
+
+        <!-- 成功消息 -->
+        {% if request.args.get('message') %}
+        <div class="success-message">
+            {{ request.args.get('message') }}
+        </div>
+        {% endif %}
+
+        <!-- 错误消息 -->
+        {% if error %}
+        <div class="order-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- 统计数据 -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ pending_cups }}</div>
+                <div class="stat-label">待制作杯数</div>
+            </div>
+        </div>
+
+        <!-- 制作中订单进度显示 -->
+        {% if making_orders %}
+        <div class="making-orders-section">
+            <h3>正在制作的订单</h3>
+
+            {% for order in making_orders %}
+            <div class="order-progress-item">
+                <div class="order-progress-head">
+                    <span class="order-progress-id">订单 #{{ order.order_id }}</span>
+                    <span class="order-progress-count">{{ order.completed_cups }}/{{ order.cups }} 杯</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" data-progress-pct="{{ order.progress_percent }}"></div>
+                </div>
+                <div class="order-progress-pct">进度: {{ order.progress_percent }}%</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- 订单表单部分 -->
+        <div class="form-container">
+            <h2 class="form-title">选择杯数</h2>
+
+            <!-- 杯子选项 -->
+            <div class="cup-options" id="cup-options" role="group" aria-label="快速选择杯数">
+                <div class="cup-option" data-cups="1" id="cup-option-1">
+                    <div class="cup-image" id="cup-image-1">1</div>
+                    <div class="cup-label">1 杯</div>
+                </div>
+
+                <div class="cup-option" data-cups="2" id="cup-option-2">
+                    <div class="cup-image" id="cup-image-2">2</div>
+                    <div class="cup-label">2 杯</div>
+                </div>
+
+                <div class="cup-option" data-cups="3" id="cup-option-3">
+                    <div class="cup-image" id="cup-image-3">3</div>
+                    <div class="cup-label">3 杯</div>
+                </div>
+            </div>
+
+            <div class="cup-hint">
+                提示：上述数字点击一次就下单成功<br>
+                若要一次性点更多杯请在下方输入数字并提交订单
+            </div>
+
+            <!-- 统一的隐藏表单 -->
+            <form method="POST" action="/order" id="order-form" style="display: none;">
+                <input type="hidden" name="cups" id="cups-value" value="">
+            </form>
+
+            <!-- 自定义表单 -->
+            <form method="POST" action="/order" id="custom-form">
+                <div class="form-group">
+                    <label for="cups-input">自定义杯数（请输入 1-10 之间的数字）</label>
+                    <input type="number" id="cups-input" name="cups" min="1" max="10" value="1" required>
+                </div>
+
+                <button type="submit" class="submit-btn" id="custom-submit-btn">提交订单</button>
+                <div class="loading-text" id="custom-loading">提交中...</div>
+            </form>
+
+<!--            <a href="/orders" class="custom-orders-link">查看所有订单明细 →</a>-->
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="footer">
+            咖啡点单系统 • {{ current_time }}
+        </div>
+    </div>
+
+    <script>
+        // 防重复提交标志
+        let isSubmitting = false;
+
+        const cupOptionsRoot = document.getElementById('cup-options');
+        const cupOptions = document.querySelectorAll('.cup-option');
+        const cupImages = document.querySelectorAll('.cup-image');
+        const customSubmitBtn = document.getElementById('custom-submit-btn');
+        const customLoading = document.getElementById('custom-loading');
+        const cupsInput = document.getElementById('cups-input');
+        const orderForm = document.getElementById('order-form');
+        const cupsValue = document.getElementById('cups-value');
+        const customForm = document.getElementById('custom-form');
+
+        function setSubmittingUi(active) {
+            if (active) {
+                customSubmitBtn.disabled = true;
+                customSubmitBtn.textContent = '提交中...';
+                customLoading.style.display = 'block';
+                cupsInput.disabled = true;
+            } else {
+                customSubmitBtn.disabled = false;
+                customSubmitBtn.textContent = '提交订单';
+                customLoading.style.display = 'none';
+                cupsInput.disabled = false;
+            }
+        }
+
+        function submitOrder(cups) {
+            if (isSubmitting) {
+                return false;
+            }
+
+            if (cups < 1 || cups > 10) {
+                alert('请输入 1-10 之间的有效数字');
+                return false;
+            }
+
+            isSubmitting = true;
+            disableAllCupOptions();
+            cupsValue.value = cups;
+            setSubmittingUi(true);
+            orderForm.submit();
+            return false;
+        }
+
+        function handleCustomFormSubmit(event) {
+            event.preventDefault();
+
+            if (isSubmitting) {
+                return false;
+            }
+
+            const cups = parseInt(cupsInput.value, 10);
+            if (isNaN(cups) || cups < 1 || cups > 10) {
+                alert('请输入 1-10 之间的有效数字');
+                cupsInput.focus();
+                cupsInput.select();
+                return false;
+            }
+
+            isSubmitting = true;
+            disableAllCupOptions();
+            cupsValue.value = cups;
+            setSubmittingUi(true);
+            orderForm.submit();
+            return false;
+        }
+
+        function disableAllCupOptions() {
+            cupOptions.forEach(option => {
+                option.classList.add('disabled');
+                option.style.cursor = 'not-allowed';
+                option.style.opacity = '0.6';
+            });
+
+            cupImages.forEach(image => {
+                image.classList.add('disabled');
+                image.style.cursor = 'not-allowed';
+                image.style.pointerEvents = 'none';
+            });
+        }
+
+        function enableAllCupOptions() {
+            cupOptions.forEach(option => {
+                option.classList.remove('disabled');
+                option.style.cursor = '';
+                option.style.opacity = '';
+            });
+
+            cupImages.forEach(image => {
+                image.classList.remove('disabled');
+                image.style.cursor = '';
+                image.style.pointerEvents = '';
+            });
+        }
+
+        function resetOrderUiAfterNavigation() {
+            isSubmitting = false;
+            enableAllCupOptions();
+            setSubmittingUi(false);
+        }
+
+        const refreshInterval = 5000;
+
+        function refreshPendingCups() {
+            fetch('/api/order_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const pendingCupsElement = document.querySelector('.stat-value:first-child');
+                        if (pendingCupsElement && pendingCupsElement.textContent !== data.pending_cups.toString()) {
+                            pendingCupsElement.textContent = data.pending_cups;
+                            pendingCupsElement.style.transform = 'scale(1.2)';
+                            setTimeout(() => {
+                                pendingCupsElement.style.transform = 'scale(1)';
+                            }, 300);
+                        }
+
+                        if (data.pending_cups > 0) {
+                            document.title = `(${data.pending_cups}) 咖啡点单系统`;
+                        } else {
+                            document.title = '咖啡点单系统';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('数据刷新失败:', error);
+                });
+        }
+
+        function applyProgressBarWidths() {
+            document.querySelectorAll('.progress-bar[data-progress-pct]').forEach(function (el) {
+                var pct = el.getAttribute('data-progress-pct');
+                if (pct !== null && pct !== '') {
+                    el.style.width = pct + '%';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applyProgressBarWidths();
+
+            cupOptionsRoot.addEventListener('click', function(event) {
+                if (isSubmitting) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                const option = event.target.closest('.cup-option');
+                if (!option || option.classList.contains('disabled')) {
+                    return;
+                }
+                const cups = parseInt(option.getAttribute('data-cups'), 10);
+                if (!isNaN(cups)) {
+                    submitOrder(cups);
+                }
+            });
+
+            customForm.addEventListener('submit', handleCustomFormSubmit);
+
+            setInterval(refreshPendingCups, refreshInterval);
+            setTimeout(refreshPendingCups, 2000);
+        });
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                resetOrderUiAfterNavigation();
+            }
+        });
+    </script>
+</body>
+</html>

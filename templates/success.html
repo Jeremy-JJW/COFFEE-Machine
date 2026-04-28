@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下单成功</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f8f4ed, #dfdbd1);
+            padding: 20px;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5d4037, #3e2723);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .content {
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #4CAF50;
+            margin: 20px 0;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .order-info {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #333;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .order-info .cups {
+            font-size: 48px;
+            font-weight: bold;
+            color: #5d4037;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .status-message {
+            font-size: 18px;
+            color: #666;
+            margin: 15px 0 30px;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            background: #5d4037;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            min-width: 140px;
+        }
+
+        .btn:hover {
+            background: #4e342e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-return {
+            background: #e0d9cc;
+            color: #5d4037;
+        }
+
+        .btn-orders {
+            background: transparent;
+            border: 2px solid #5d4037;
+            color: #5d4037;
+        }
+
+        .redirect-info {
+            color: #666;
+            margin-top: 30px;
+            font-size: 14px;
+            animation: fadeInUp 0.6s ease-out 0.8s both;
+        }
+
+        .countdown {
+            font-weight: bold;
+            color: #5d4037;
+            font-size: 16px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 30px 15px;
+            }
+
+            .order-info {
+                font-size: 20px;
+            }
+
+            .order-info .cups {
+                font-size: 36px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                min-width: 120px;
+            }
+
+            .action-buttons {
+                gap: 10px;
+            }
+
+            .status-message {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题部分 -->
+        <div class="header">
+            <h1>下单成功</h1>
+        </div>
+
+        <div class="content">
+            <div class="success-icon">✓</div>
+            <p class="order-info">您已成功下单 <span class="cups">{{ cups }}</span> 杯咖啡</p>
+            <p class="status-message">咖啡正在制作中，请稍候...</p>
+
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
+                <a href="/" class="btn btn-return">返回主页</a>
+                <a href="/orders" class="btn btn-orders">查看所有订单</a>
+            </div>
+
+            <!-- 倒计时信息 -->
+            <div class="redirect-info">
+                <p>页面将在 <span class="countdown" id="countdown">5</span> 秒后自动返回主页...</p>
+            </div>
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="footer">
+            咖啡点单系统 • {{ current_time }}
+        </div>
+    </div>
+
+    <script>
+        let countdownValue = 5;
+        const countdownElement = document.getElementById('countdown');
+
+        function updateCountdown() {
+            countdownValue--;
+            countdownElement.textContent = Math.max(0, countdownValue);
+
+            if (countdownValue <= 0) {
+                clearInterval(countdownTimer);
+                window.location.replace('/');
+            }
+        }
+
+        const countdownTimer = setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>
